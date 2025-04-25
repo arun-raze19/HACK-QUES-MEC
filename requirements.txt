@@ -1,0 +1,6 @@
+PyQt5==5.15.9
+psutil==5.9.5
+pyautogui==0.9.54
+pynput==1.7.6
+requests==2.31.0
+python-dotenv==1.0.0 

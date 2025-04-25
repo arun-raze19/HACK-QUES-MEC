@@ -1,0 +1,31 @@
+Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+What is the time complexity of binary search?,O(1),O(log n),O(n),O(n log n),B
+Which data structure uses LIFO principle?,Queue,Stack,Tree,Graph,B
+What is the worst-case time complexity of Quick Sort?,O(n log n),O(n²),O(n),O(log n),B
+Which of these is not a linear data structure?,Array,Linked List,Tree,Stack,C
+What is the time complexity of inserting an element at the beginning of an array?,O(1),O(log n),O(n),O(n²),C
+Which sorting algorithm has the best average-case time complexity?,Bubble Sort,Quick Sort,Selection Sort,Insertion Sort,B
+What is the maximum number of nodes in a binary tree of height h?,2^h,2^h - 1,h^2,h!,B
+Which of these is not a valid tree traversal?,Inorder,Preorder,Postorder,Sideorder,D
+What is the time complexity of searching in a hash table?,O(1),O(log n),O(n),O(n log n),A
+Which data structure is best for implementing a priority queue?,Array,Linked List,Heap,Stack,C
+What is the time complexity of Dijkstra's algorithm?,O(V),O(V log V),O(V²),O(V³),B
+Which of these is not a valid graph representation?,Adjacency Matrix,Adjacency List,Edge List,Node List,D
+What is the time complexity of BFS?,O(V),O(V + E),O(V²),O(V log V),B
+Which of these is not a valid sorting algorithm?,Bubble Sort,Quick Sort,Tree Sort,Graph Sort,D
+What is the time complexity of finding the maximum element in a max-heap?,O(1),O(log n),O(n),O(n log n),A
+Which of these is not a valid tree?,Binary Tree,AVL Tree,Red-Black Tree,Blue Tree,D
+What is the time complexity of inserting an element in a balanced BST?,O(1),O(log n),O(n),O(n log n),B
+Which of these is not a valid graph algorithm?,Dijkstra's,Prim's,Kruskal's,Newton's,D
+What is the time complexity of matrix multiplication?,O(n),O(n²),O(n³),O(n⁴),C
+Which of these is not a valid data structure?,Array,Linked List,Tree,Circle,D
+What is the time complexity of finding an element in a sorted array using binary search?,O(1),O(log n),O(n),O(n log n),B
+Which of these is not a valid tree property?,Height,Depth,Width,Color,D
+What is the time complexity of heap sort?,O(n),O(n log n),O(n²),O(n³),B
+Which of these is not a valid graph property?,Degree,Diameter,Radius,Volume,D
+What is the time complexity of finding the shortest path in an unweighted graph using BFS?,O(V),O(V + E),O(V²),O(V log V),B
+Which of these is not a valid sorting property?,Stable,In-place,Online,Offline,D
+What is the time complexity of finding the median of an unsorted array?,O(1),O(log n),O(n),O(n log n),C
+Which of these is not a valid tree operation?,Insert,Delete,Search,Sort,D
+What is the time complexity of finding the maximum subarray sum using Kadane's algorithm?,O(n),O(n log n),O(n²),O(n³),A
+Which of these is not a valid graph traversal?,BFS,DFS,Level Order,Random Walk,D
