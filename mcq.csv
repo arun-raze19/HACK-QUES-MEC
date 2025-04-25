@@ -1,31 +1,31 @@
 Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+Which data structure is best for implementing a browser's back button?,Queue,Stack,Tree,Graph,B
+What is JavaScript?,Programming language,Coffee,Computer,Software,A
+What is an algorithm?,Hardware,Step-by-step procedure,Memory,Processor,B
+What is Python?,A programming language,A snake,A type of coffee,A computer brand,A
+What is the time complexity of deleting in a balanced BST?,O(1),O(log n),O(n),O(n log n),B
+What is the maximum number of nodes in a binary tree of height h?,2^h,2^(h+1)-1,h^2,h+1,B
+What does 'break' do?,Ends program,Skips iteration,Exits loop,Continues loop,C
+What is web server?,Computer,Serves web pages,Software,Hardware,B
+What is the time complexity of bubble sort?,O(n),O(n log n),O(n²),O(1),C
+What is the output: def greet(): print('Hello'); greet(),Hello,Error,Nothing,greet,A
+What is the time complexity of finding articulation points?,O(V),O(E),O(V+E),O(V*E),C
+Which data structure uses FIFO principle?,Queue,Stack,Tree,Graph,A
+What is a function?,A variable,Reusable code,Data structure,Loop,B
+What is RAM?,Read Access Memory,Random Access Memory,Read Only Memory,Random Only Memory,B
+Which of these is a Python list?,"[1, 2, 3]","{1, 2, 3}","(1, 2, 3)","1, 2, 3",A
+What is the time complexity of DFS?,O(V),O(E),O(V+E),O(V*E),C
+Which is valid function call?,my_func(),call my_func(),execute my_func(),run my_func(),A
+What is the time complexity of merge sort?,O(n),O(n log n),O(n²),O(1),B
+What is the time complexity of selection sort?,O(n),O(n log n),O(n²),O(1),C
+Which keyword skips iteration?,skip,continue,next,pass,B
+What is the output of print(10 / 3)?,3,3.333...,3.0,Error,B
+What is the maximum number of children a node can have in a binary tree?,1,2,3,4,B
+What is the time complexity of radix sort?,O(n),O(n log n),O(nk),O(1),C
+What is IP address?,Protocol address,Password,Program,Port,A
+What is the output: for i in range(3): print(i),0 1 2,1 2 3,0 1 2 3,Error,A
+What is the time complexity of Kruskal's algorithm?,O(E log V),O(V log E),O(V+E),O(V*E),A
+What is the time complexity of inserting an element at the end of a linked list?,O(1),O(log n),O(n),O(n log n),A
+Which data structure is best for implementing a file system?,Queue,Stack,Tree,Graph,C
+What is a server?,Computer,Provides services,Software,Hardware,B
 What is the time complexity of binary search?,O(1),O(log n),O(n),O(n log n),B
-Which data structure uses LIFO principle?,Queue,Stack,Tree,Graph,B
-What is the worst-case time complexity of Quick Sort?,O(n log n),O(n²),O(n),O(log n),B
-Which of these is not a linear data structure?,Array,Linked List,Tree,Stack,C
-What is the time complexity of inserting an element at the beginning of an array?,O(1),O(log n),O(n),O(n²),C
-Which sorting algorithm has the best average-case time complexity?,Bubble Sort,Quick Sort,Selection Sort,Insertion Sort,B
-What is the maximum number of nodes in a binary tree of height h?,2^h,2^h - 1,h^2,h!,B
-Which of these is not a valid tree traversal?,Inorder,Preorder,Postorder,Sideorder,D
-What is the time complexity of searching in a hash table?,O(1),O(log n),O(n),O(n log n),A
-Which data structure is best for implementing a priority queue?,Array,Linked List,Heap,Stack,C
-What is the time complexity of Dijkstra's algorithm?,O(V),O(V log V),O(V²),O(V³),B
-Which of these is not a valid graph representation?,Adjacency Matrix,Adjacency List,Edge List,Node List,D
-What is the time complexity of BFS?,O(V),O(V + E),O(V²),O(V log V),B
-Which of these is not a valid sorting algorithm?,Bubble Sort,Quick Sort,Tree Sort,Graph Sort,D
-What is the time complexity of finding the maximum element in a max-heap?,O(1),O(log n),O(n),O(n log n),A
-Which of these is not a valid tree?,Binary Tree,AVL Tree,Red-Black Tree,Blue Tree,D
-What is the time complexity of inserting an element in a balanced BST?,O(1),O(log n),O(n),O(n log n),B
-Which of these is not a valid graph algorithm?,Dijkstra's,Prim's,Kruskal's,Newton's,D
-What is the time complexity of matrix multiplication?,O(n),O(n²),O(n³),O(n⁴),C
-Which of these is not a valid data structure?,Array,Linked List,Tree,Circle,D
-What is the time complexity of finding an element in a sorted array using binary search?,O(1),O(log n),O(n),O(n log n),B
-Which of these is not a valid tree property?,Height,Depth,Width,Color,D
-What is the time complexity of heap sort?,O(n),O(n log n),O(n²),O(n³),B
-Which of these is not a valid graph property?,Degree,Diameter,Radius,Volume,D
-What is the time complexity of finding the shortest path in an unweighted graph using BFS?,O(V),O(V + E),O(V²),O(V log V),B
-Which of these is not a valid sorting property?,Stable,In-place,Online,Offline,D
-What is the time complexity of finding the median of an unsorted array?,O(1),O(log n),O(n),O(n log n),C
-Which of these is not a valid tree operation?,Insert,Delete,Search,Sort,D
-What is the time complexity of finding the maximum subarray sum using Kadane's algorithm?,O(n),O(n log n),O(n²),O(n³),A
-Which of these is not a valid graph traversal?,BFS,DFS,Level Order,Random Walk,D

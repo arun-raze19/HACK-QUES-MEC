@@ -1,217 +1,250 @@
-import csv
+import sys
 import random
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QRadioButton, 
-                           QButtonGroup, QPushButton, QMessageBox, QScrollArea,
-                           QProgressBar, QHBoxLayout)
-from PyQt5.QtCore import Qt, QTimer, QTime, pyqtSignal
-from datetime import datetime, timedelta
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+                           QLabel, QRadioButton, QButtonGroup, QPushButton, 
+                           QScrollArea, QMessageBox, QDialog, QHBoxLayout)
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtGui import QFont, QColor
+from create_mcq import categories, generate_random_questions
 
-class MCQRound(QWidget):
-    finished = pyqtSignal(int)  # Signal to emit when round is finished
+class MCQRound(QMainWindow):
+    finished = pyqtSignal(int)  # Signal to emit score when round is finished
     
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("MCQ Round - AI_HACKBLITZ-XXV")
-        self.setGeometry(200, 200, 1000, 800)
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("MCQ Round")
+        self.setGeometry(100, 100, 1000, 800)
         self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         
         self.questions = []
-        self.current_question = None
+        self.selected_answers = {}
+        self.current_question = 0
         self.score = 0
-        self.start_time = None
-        self.end_time = None
-        self.button_groups = []
-        
-        # Timer setup
         self.time_left = 45 * 60  # 45 minutes in seconds
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_timer)
         
         self.load_questions()
         self.setup_ui()
+        self.start_timer()
         
-        # Start timer
+    def start_timer(self):
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_timer)
         self.timer.start(1000)  # Update every second
         
     def load_questions(self):
         try:
-            with open('mcq.csv', 'r', encoding='utf-8') as file:
-                reader = csv.reader(file)
-                next(reader)  # Skip header row
-                all_questions = []
-                for row in reader:
-                    if len(row) >= 6:  # Ensure row has all required fields
-                        question = {
-                            'question': row[0].strip(),
-                            'options': {
-                                'A': row[1].strip(),
-                                'B': row[2].strip(),
-                                'C': row[3].strip(),
-                                'D': row[4].strip()
-                            },
-                            'correct': row[5].strip().upper()
-                        }
-                        # Validate correct answer format
-                        if question['correct'] in ['A', 'B', 'C', 'D']:
-                            all_questions.append(question)
-                
-                if not all_questions:
-                    raise ValueError("No valid questions found in the CSV file")
-                
-                # Randomly select 30 questions from the pool
-                self.questions = random.sample(all_questions, min(30, len(all_questions)))
-                print(f"Loaded {len(self.questions)} questions")
-                
+            # Get questions directly from create_mcq.py
+            self.questions = generate_random_questions()
+            
+            # Initialize selected answers dictionary
+            self.selected_answers = {i: None for i in range(len(self.questions))}
+            
         except Exception as e:
-            print(f"Failed to load questions: {str(e)}")
-            raise
-
+            QMessageBox.critical(self, "Error", f"Failed to load questions: {str(e)}")
+            sys.exit(1)
+            
     def setup_ui(self):
+        # Main widget and layout
+        main_widget = QWidget()
         main_layout = QVBoxLayout()
         
         # Header section
         header_layout = QHBoxLayout()
         
-        # Timer display
-        timer_layout = QVBoxLayout()
-        self.timer_label = QLabel("Time Remaining: 45:00")
-        self.timer_label.setStyleSheet("font-size: 16px; font-weight: bold;")
-        timer_layout.addWidget(self.timer_label)
-        
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setMaximum(45 * 60)
-        self.progress_bar.setValue(45 * 60)
-        self.progress_bar.setTextVisible(False)
-        timer_layout.addWidget(self.progress_bar)
-        
-        header_layout.addLayout(timer_layout)
+        # Timer
+        self.timer_label = QLabel("Time Left: 45:00")
+        self.timer_label.setFont(QFont("Arial", 12, QFont.Bold))
+        self.timer_label.setStyleSheet("color: #2E7D32;")
+        header_layout.addWidget(self.timer_label)
         
         # Question counter
-        self.question_counter = QLabel(f"Questions: 1/{len(self.questions)}")
-        self.question_counter.setStyleSheet("font-size: 16px; font-weight: bold;")
+        self.question_counter = QLabel(f"Total Questions: {len(self.questions)}")
+        self.question_counter.setFont(QFont("Arial", 12))
         header_layout.addWidget(self.question_counter)
         
         main_layout.addLayout(header_layout)
         
-        # Create scroll area for questions
+        # Scroll area for questions
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll_content = QWidget()
-        self.scroll_layout = QVBoxLayout(scroll_content)
+        scroll.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: white;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #f0f0f0;
+                width: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #c0c0c0;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+        """)
         
-        # Add questions
-        for i, q in enumerate(self.questions):
-            question_group = QWidget()
+        # Questions container
+        self.questions_container = QWidget()
+        self.questions_layout = QVBoxLayout()
+        self.questions_layout.setSpacing(20)
+        self.questions_layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Create question widgets
+        self.question_widgets = []
+        self.option_groups = []
+        
+        for i, question_data in enumerate(self.questions):
+            question_widget = QWidget()
             question_layout = QVBoxLayout()
             
             # Question label
-            question_label = QLabel(f"{i+1}. {q['question']}")
+            question_label = QLabel(f"{i+1}. {question_data[0]}")
+            question_label.setFont(QFont("Arial", 11))
             question_label.setWordWrap(True)
-            question_label.setStyleSheet("font-size: 14px; margin-bottom: 10px;")
             question_layout.addWidget(question_label)
             
             # Options
-            button_group = QButtonGroup()
-            for option_key, option_text in q['options'].items():
-                radio = QRadioButton(f"{option_key}. {option_text}")
-                radio.setStyleSheet("font-size: 13px; margin-left: 20px;")
-                button_group.addButton(radio)
-                question_layout.addWidget(radio)
-                
-            self.button_groups.append(button_group)
-            question_group.setLayout(question_layout)
-            self.scroll_layout.addWidget(question_group)
+            options_group = QButtonGroup(question_widget)
+            options = question_data[1:5]  # Get options A to D
             
-        scroll.setWidget(scroll_content)
+            for j, option in enumerate(options):
+                radio = QRadioButton(f"{chr(65+j)}. {option}")  # A, B, C, D
+                radio.setFont(QFont("Arial", 10))
+                radio.setStyleSheet("""
+                    QRadioButton {
+                        padding: 5px;
+                        margin: 2px;
+                    }
+                    QRadioButton:hover {
+                        background-color: #f0f0f0;
+                    }
+                """)
+                options_group.addButton(radio, j)
+                question_layout.addWidget(radio)
+            
+            # Connect radio buttons to answer selection
+            options_group.buttonClicked.connect(lambda btn, idx=i: self.select_answer(idx, btn))
+            
+            question_widget.setLayout(question_layout)
+            self.questions_layout.addWidget(question_widget)
+            self.question_widgets.append(question_widget)
+            self.option_groups.append(options_group)
+        
+        self.questions_container.setLayout(self.questions_layout)
+        scroll.setWidget(self.questions_container)
         main_layout.addWidget(scroll)
         
         # Submit button
-        button_layout = QHBoxLayout()
-        self.submit_button = QPushButton("Submit Answers")
-        self.submit_button.setStyleSheet("""
+        submit_button = QPushButton("Submit Answers")
+        submit_button.setFont(QFont("Arial", 12, QFont.Bold))
+        submit_button.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
-                padding: 8px 16px;
-                border: none;
-                border-radius: 4px;
-                font-size: 14px;
+                padding: 10px;
+                border-radius: 5px;
+                min-width: 150px;
             }
             QPushButton:hover {
                 background-color: #45a049;
             }
+            QPushButton:pressed {
+                background-color: #3d8b40;
+            }
         """)
-        self.submit_button.clicked.connect(self.calculate_score)
-        button_layout.addWidget(self.submit_button)
-        main_layout.addLayout(button_layout)
+        submit_button.clicked.connect(self.submit_answers)
+        main_layout.addWidget(submit_button, alignment=Qt.AlignCenter)
         
-        self.setLayout(main_layout)
+        main_widget.setLayout(main_layout)
+        self.setCentralWidget(main_widget)
+        
+    def select_answer(self, question_index, button):
+        self.selected_answers[question_index] = button.text()[0]  # Store A, B, C, or D
         
     def update_timer(self):
         self.time_left -= 1
         minutes = self.time_left // 60
         seconds = self.time_left % 60
         
-        # Update timer label
-        self.timer_label.setText(f"Time Remaining: {minutes:02d}:{seconds:02d}")
-        
-        # Update progress bar
-        self.progress_bar.setValue(self.time_left)
-        
-        # Change color based on time remaining
-        if self.time_left <= 5 * 60:  # Last 5 minutes
-            self.timer_label.setStyleSheet("font-size: 16px; font-weight: bold; color: red;")
-            self.progress_bar.setStyleSheet("QProgressBar::chunk { background-color: red; }")
-        elif self.time_left <= 15 * 60:  # Last 15 minutes
-            self.timer_label.setStyleSheet("font-size: 16px; font-weight: bold; color: orange;")
-            self.progress_bar.setStyleSheet("QProgressBar::chunk { background-color: orange; }")
+        # Update timer color based on remaining time
+        if minutes < 5:
+            self.timer_label.setStyleSheet("color: #D32F2F;")  # Red for last 5 minutes
+        elif minutes < 15:
+            self.timer_label.setStyleSheet("color: #FFA000;")  # Orange for last 15 minutes
+        else:
+            self.timer_label.setStyleSheet("color: #2E7D32;")  # Green otherwise
             
-        # Auto-submit when time is up
+        self.timer_label.setText(f"Time Left: {minutes:02d}:{seconds:02d}")
+        
         if self.time_left <= 0:
             self.timer.stop()
-            QMessageBox.warning(self, "Time's Up!", "The time for MCQ round has ended. Your answers will be submitted automatically.")
-            self.calculate_score()
+            self.submit_answers()
             
-    def calculate_score(self):
-        # Stop the timer
-        self.timer.stop()
-        
+    def submit_answers(self):
+        # Calculate score
         self.score = 0
-        for i, (q, button_group) in enumerate(zip(self.questions, self.button_groups)):
-            checked_button = button_group.checkedButton()
-            if checked_button:
-                selected_option = checked_button.text()[0]  # Get the option letter (A, B, C, D)
-                if selected_option == q['correct']:
-                    self.score += 1
+        for i, question in enumerate(self.questions):
+            correct_answer = question[5]  # Correct answer is at index 5
+            if self.selected_answers[i] == correct_answer:
+                self.score += 1
                 
-        # Show score
-        QMessageBox.information(self, "MCQ Round Complete", 
-                              f"Your score: {self.score}/30\n"
-                              f"You need at least 15 points to qualify for DSA rounds.")
+        # Show score dialog
+        score_dialog = QDialog(self)
+        score_dialog.setWindowTitle("Round Complete")
+        score_dialog.setFixedSize(300, 200)
         
-        # Emit finished signal with score
+        layout = QVBoxLayout()
+        
+        # Score label
+        score_label = QLabel(f"Your Score: {self.score}/{len(self.questions)}")
+        score_label.setFont(QFont("Arial", 14, QFont.Bold))
+        score_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(score_label)
+        
+        # Qualification status
+        status_label = QLabel()
+        status_label.setFont(QFont("Arial", 12))
+        status_label.setAlignment(Qt.AlignCenter)
+        
+        if self.score >= 15:  # 50% threshold
+            status_label.setText("Congratulations! You have qualified for the next round.")
+            status_label.setStyleSheet("color: #2E7D32;")
+        else:
+            status_label.setText("Sorry, you did not qualify for the next round.")
+            status_label.setStyleSheet("color: #D32F2F;")
+            
+        layout.addWidget(status_label)
+        
+        # OK button
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(lambda: self.close_round(score_dialog))
+        layout.addWidget(ok_button)
+        
+        score_dialog.setLayout(layout)
+        score_dialog.exec_()
+        
+    def close_round(self, dialog):
+        dialog.accept()
         self.finished.emit(self.score)
-        
-        # Close the window
         self.close()
         
     def closeEvent(self, event):
-        # Stop the timer
-        self.timer.stop()
-        
-        # Ensure all questions are answered
-        unanswered = [i+1 for i, group in enumerate(self.button_groups) 
-                     if not group.checkedButton()]
-        
-        if unanswered:
-            reply = QMessageBox.question(self, 'Unanswered Questions',
-                                       f'You have unanswered questions: {unanswered}\n'
-                                       'Are you sure you want to submit?',
-                                       QMessageBox.Yes | QMessageBox.No,
-                                       QMessageBox.No)
+        # Check if there are unanswered questions
+        unanswered = sum(1 for ans in self.selected_answers.values() if ans is None)
+        if unanswered > 0:
+            reply = QMessageBox.question(
+                self, 'Confirm Exit',
+                f'You have {unanswered} unanswered questions. Are you sure you want to submit?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+            )
             
-            if reply == QMessageBox.No:
+            if reply == QMessageBox.Yes:
+                self.submit_answers()
+                event.accept()
+            else:
                 event.ignore()
-                return
-                
-        event.accept() 
+        else:
+            self.submit_answers()
+            event.accept() 
