@@ -10,15 +10,16 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                            QDialog, QHBoxLayout, QTextEdit, QComboBox)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QFont, QColor
+from datetime import datetime
 
-class DSARound1(QMainWindow):
+class DSARound2(QMainWindow):
     finished = pyqtSignal(int)  # Signal to emit score when round is finished
     
     def __init__(self, team_name, logger):
         super().__init__()
         self.team_name = team_name
         self.logger = logger
-        self.setWindowTitle("DSA Round 1")
+        self.setWindowTitle("DSA Round 2")
         self.setGeometry(100, 100, 1000, 800)
         self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         
@@ -28,7 +29,8 @@ class DSARound1(QMainWindow):
         self.questions = self.get_questions()
         self.current_question = 0
         self.score = 0
-        self.time_left = 20 * 60  # 20 minutes in seconds
+        self.time_left = 45 * 60  # 45 minutes in seconds
+        self.start_time = datetime.now()
         self.user_answers = {}
         
         self.setup_ui()
@@ -36,13 +38,13 @@ class DSARound1(QMainWindow):
         
         # Log round start
         self.logger.log_activity(
-            'DSA1',
+            'DSA2',
             'System',
             '',
             'Started',
             0,
             0,
-            'DSA Round 1 started'
+            'DSA Round 2 started'
         )
         
     def detect_python_interpreters(self):
@@ -80,122 +82,108 @@ class DSARound1(QMainWindow):
         
         return interpreters
 
-    def start_timer(self):
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_timer)
-        self.timer.start(1000)  # Update every second
-        
-    def update_timer(self):
-        self.time_left -= 1
-        minutes = self.time_left // 60
-        seconds = self.time_left % 60
-        
-        # Update timer color based on remaining time
-        if minutes < 10:
-            self.timer_label.setStyleSheet("color: #D32F2F;")  # Red for last 10 minutes
-        elif minutes < 30:
-            self.timer_label.setStyleSheet("color: #FFA000;")  # Orange for last 30 minutes
-        else:
-            self.timer_label.setStyleSheet("color: #2E7D32;")  # Green otherwise
-            
-        self.timer_label.setText(f"Time Left: {minutes:02d}:{seconds:02d}")
-        
-        if self.time_left <= 0:
-            self.timer.stop()
-            self.submit_answers()
-        
     def get_questions(self):
-        # Pool of 5 problems with test cases
+        # Pool of 5 moderate-level problems with test cases
         problem_pool = [
             {
-                "question": "Implement a function to find the maximum element in a binary search tree.",
-                "input_format": "The function should take the root of the BST as input.",
-                "output_format": "Return the maximum value in the BST.",
+                "question": "Implement a function to find the number of islands in a 2D grid. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically.",
+                "input_format": "The function should take a 2D grid of '1's (land) and '0's (water) as input.",
+                "output_format": "Return the number of islands.",
                 "test_cases": [
-                    {"input": "[5,3,7,2,4,6,8]", "output": "8", "points": 3},
-                    {"input": "[10,5,15,3,7,12,20]", "output": "20", "points": 3},
-                    {"input": "[1]", "output": "1", "points": 3},
-                    {"input": "[5,3,7,2,4,6,8,9]", "output": "9", "points": 3},
-                    {"input": "[10,5,15,3,7,12,20,25]", "output": "25", "points": 3},
-                    {"input": "[5,3,7,2,4,6,8,9,10]", "output": "10", "points": 3},
-                    {"input": "[10,5,15,3,7,12,20,25,30]", "output": "30", "points": 3},
-                    {"input": "[5,3,7,2,4,6,8,9,10,11]", "output": "11", "points": 3},
-                    {"input": "[10,5,15,3,7,12,20,25,30,35]", "output": "35", "points": 3},
-                    {"input": "[5,3,7,2,4,6,8,9,10,11,12]", "output": "12", "points": 3}
+                    {"input": "[[1,1,1,1,0],[1,1,0,1,0],[1,1,0,0,0],[0,0,0,0,0]]", "output": "1", "points": 3.33},
+                    {"input": "[[1,1,0,0,0],[1,1,0,0,0],[0,0,1,0,0],[0,0,0,1,1]]", "output": "3", "points": 3.33},
+                    {"input": "[[1,0,1,0,1],[0,1,0,1,0],[1,0,1,0,1],[0,1,0,1,0]]", "output": "10", "points": 3.33},
+                    {"input": "[[1,1,1],[0,1,0],[1,1,1]]", "output": "1", "points": 3.33},
+                    {"input": "[[1,0,1,0,1],[1,0,1,0,1],[1,1,1,1,1]]", "output": "1", "points": 3.33},
+                    {"input": "[[1,1,1,1,1],[1,0,0,0,1],[1,0,1,0,1],[1,0,0,0,1],[1,1,1,1,1]]", "output": "2", "points": 3.33},
+                    {"input": "[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]", "output": "0", "points": 3.33},
+                    {"input": "[[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]", "output": "1", "points": 3.33},
+                    {"input": "[[1,0,1,0,1],[0,1,0,1,0],[1,0,1,0,1],[0,1,0,1,0],[1,0,1,0,1]]", "output": "13", "points": 3.33},
+                    {"input": "[[1,1,0,0,0,0],[1,1,0,0,0,0],[0,0,1,1,0,0],[0,0,1,1,0,0],[0,0,0,0,1,1],[0,0,0,0,1,1]]", "output": "3", "points": 3.33},
+                    {"input": "[[1,0,0,0,0,1],[0,1,0,0,1,0],[0,0,1,1,0,0],[0,0,1,1,0,0],[0,1,0,0,1,0],[1,0,0,0,0,1]]", "output": "6", "points": 3.33},
+                    {"input": "[[1,1,1,0,0,0],[1,0,1,0,0,0],[1,1,1,0,0,0],[0,0,0,1,1,1],[0,0,0,1,0,1],[0,0,0,1,1,1]]", "output": "2", "points": 3.33}
                 ],
-                "total_points": 30
+                "total_points": 40
             },
             {
-                "question": "Write a function to check if a given string is a palindrome using a stack.",
+                "question": "Implement a function to find the minimum number of coins needed to make up a given amount using coins of given denominations.",
+                "input_format": "The function should take an array of coin denominations and the target amount as input.",
+                "output_format": "Return the minimum number of coins needed to make up the amount. If it's not possible, return -1.",
+                "test_cases": [
+                    {"input": "[1,2,5]\n11", "output": "3", "points": 3.33},
+                    {"input": "[2]\n3", "output": "-1", "points": 3.33},
+                    {"input": "[1,2,5,10,20,50,100]\n73", "output": "4", "points": 3.33},
+                    {"input": "[1,3,4,5]\n7", "output": "2", "points": 3.33},
+                    {"input": "[1,2,5,10]\n18", "output": "4", "points": 3.33},
+                    {"input": "[1,5,10,25]\n30", "output": "2", "points": 3.33},
+                    {"input": "[1,2,5,10,20]\n43", "output": "5", "points": 3.33},
+                    {"input": "[2,5,10,20]\n1", "output": "-1", "points": 3.33},
+                    {"input": "[1,3,4,5]\n10", "output": "2", "points": 3.33},
+                    {"input": "[1,2,5,10,20,50]\n65", "output": "3", "points": 3.33},
+                    {"input": "[1,2,5,10,20,50,100]\n127", "output": "4", "points": 3.33},
+                    {"input": "[1,2,5,10,20,50,100]\n200", "output": "2", "points": 3.33}
+                ],
+                "total_points": 40
+            },
+            {
+                "question": "Implement a function to find the longest palindromic substring in a given string.",
                 "input_format": "The function should take a string as input.",
-                "output_format": "Return True if the string is a palindrome, False otherwise.",
+                "output_format": "Return the longest palindromic substring.",
                 "test_cases": [
-                    {"input": "racecar", "output": "True", "points": 3},
-                    {"input": "hello", "output": "False", "points": 3},
-                    {"input": "madam", "output": "True", "points": 3},
-                    {"input": "random", "output": "False", "points": 3},  # Random test case
-                    {"input": "level", "output": "True", "points": 3},
-                    {"input": "python", "output": "False", "points": 3},
-                    {"input": "radar", "output": "True", "points": 3},
-                    {"input": "random", "output": "False", "points": 3},  # Random test case
-                    {"input": "civic", "output": "True", "points": 3},
-                    {"input": "random", "output": "False", "points": 3}   # Random test case
+                    {"input": "babad", "output": "bab", "points": 3.33},
+                    {"input": "cbbd", "output": "bb", "points": 3.33},
+                    {"input": "a", "output": "a", "points": 3.33},
+                    {"input": "ac", "output": "a", "points": 3.33},
+                    {"input": "racecar", "output": "racecar", "points": 3.33},
+                    {"input": "abacdfgdcaba", "output": "aba", "points": 3.33},
+                    {"input": "forgeeksskeegfor", "output": "geeksskeeg", "points": 3.33},
+                    {"input": "abcbabcbabcba", "output": "abcbabcbabcba", "points": 3.33},
+                    {"input": "abacabacabbacabacab", "output": "bacabacabbacabacab", "points": 3.33},
+                    {"input": "abacabacabbacabacaba", "output": "abacabacabbacabacaba", "points": 3.33},
+                    {"input": "abacabacabbacabacabac", "output": "abacabacabbacabacaba", "points": 3.33},
+                    {"input": "abacabacabbacabacabaca", "output": "abacabacabbacabacaba", "points": 3.33}
                 ],
-                "total_points": 30
+                "total_points": 40
             },
             {
-                "question": "Implement a function to perform level order traversal of a binary tree.",
-                "input_format": "The function should take the root of the binary tree as input.",
-                "output_format": "Return a list of values in level order.",
+                "question": "Implement a function to find the maximum product subarray in a given array of integers.",
+                "input_format": "The function should take an array of integers as input.",
+                "output_format": "Return the maximum product of any contiguous subarray.",
                 "test_cases": [
-                    {"input": "[3,9,20,null,null,15,7]", "output": "[3,9,20,15,7]", "points": 3},
-                    {"input": "[1]", "output": "[1]", "points": 3},
-                    {"input": "[]", "output": "[]", "points": 3},
-                    {"input": "[1,2,3,4,5]", "output": "[1,2,3,4,5]", "points": 3},
-                    {"input": "[1,null,2,3]", "output": "[1,2,3]", "points": 3},
-                    {"input": "[1,2,3,4,null,null,5]", "output": "[1,2,3,4,5]", "points": 3},
-                    {"input": "[1,2,3,null,4,5]", "output": "[1,2,3,4,5]", "points": 3},
-                    {"input": "[1,2,3,4,5,6,7]", "output": "[1,2,3,4,5,6,7]", "points": 3},
-                    {"input": "[1,2,3,4,5,null,6]", "output": "[1,2,3,4,5,6]", "points": 3},
-                    {"input": "[1,2,3,4,5,6]", "output": "[1,2,3,4,5,6]", "points": 3}
+                    {"input": "[2,3,-2,4]", "output": "6", "points": 3.33},
+                    {"input": "[-2,0,-1]", "output": "0", "points": 3.33},
+                    {"input": "[2,3,-2,4,-1]", "output": "48", "points": 3.33},
+                    {"input": "[-2,-3,-4]", "output": "12", "points": 3.33},
+                    {"input": "[0,2]", "output": "2", "points": 3.33},
+                    {"input": "[-2,3,-4]", "output": "24", "points": 3.33},
+                    {"input": "[2,-5,-2,-4,3]", "output": "24", "points": 3.33},
+                    {"input": "[3,-1,4]", "output": "4", "points": 3.33},
+                    {"input": "[1,2,-3,0,-4,-5]", "output": "20", "points": 3.33},
+                    {"input": "[2,-5,3,1,-4,0,-10,2,8]", "output": "120", "points": 3.33},
+                    {"input": "[-1,-2,-3,0]", "output": "6", "points": 3.33},
+                    {"input": "[1,2,3,4,5,6,7,8,9,10]", "output": "3628800", "points": 3.33}
                 ],
-                "total_points": 30
+                "total_points": 40
             },
             {
-                "question": "Implement a function to find the longest substring without repeating characters.",
-                "input_format": "The function should take a string as input.",
-                "output_format": "Return the length of the longest substring without repeating characters.",
+                "question": "Implement a function to find the minimum window substring in a given string that contains all characters of another string.",
+                "input_format": "The function should take two strings s and t as input.",
+                "output_format": "Return the minimum window substring of s that contains all characters of t.",
                 "test_cases": [
-                    {"input": "abcabcbb", "output": "3", "points": 3},
-                    {"input": "bbbbb", "output": "1", "points": 3},
-                    {"input": "pwwkew", "output": "3", "points": 3},
-                    {"input": "abcdef", "output": "6", "points": 3},
-                    {"input": "aab", "output": "2", "points": 3},
-                    {"input": "dvdf", "output": "3", "points": 3},
-                    {"input": "anviaj", "output": "5", "points": 3},
-                    {"input": "qrsvbspk", "output": "5", "points": 3},
-                    {"input": "tmmzuxt", "output": "5", "points": 3},
-                    {"input": "bbtablud", "output": "6", "points": 3}
+                    {"input": "ADOBECODEBANC\nABC", "output": "BANC", "points": 3.33},
+                    {"input": "a\na", "output": "a", "points": 3.33},
+                    {"input": "a\nb", "output": "", "points": 3.33},
+                    {"input": "ab\nb", "output": "b", "points": 3.33},
+                    {"input": "cabwefgewcwaefgcf\ncae", "output": "cwae", "points": 3.33},
+                    {"input": "aaflslflsldkalskaaa\naaa", "output": "aaa", "points": 3.33},
+                    {"input": "abababaabababaabababa\naba", "output": "aba", "points": 3.33},
+                    {"input": "abababaabababaabababa\nabab", "output": "abab", "points": 3.33},
+                    {"input": "abababaabababaabababa\nababa", "output": "ababa", "points": 3.33},
+                    {"input": "abababaabababaabababa\nababab", "output": "ababab", "points": 3.33},
+                    {"input": "abababaabababaabababa\nabababa", "output": "abababa", "points": 3.33},
+                    {"input": "abababaabababaabababa\nabababab", "output": "abababaab", "points": 3.33}
                 ],
-                "total_points": 30
-            },
-            {
-                "question": "Implement a function to find the median of two sorted arrays.",
-                "input_format": "The function should take two sorted arrays as input.",
-                "output_format": "Return the median of the two arrays.",
-                "test_cases": [
-                    {"input": "[1,3], [2]", "output": "2.0", "points": 3},
-                    {"input": "[1,2], [3,4]", "output": "2.5", "points": 3},
-                    {"input": "[0,0], [0,0]", "output": "0.0", "points": 3},
-                    {"input": "[1,3,5], [2,4,6]", "output": "3.5", "points": 3},
-                    {"input": "[1,2,3], [4,5,6]", "output": "3.5", "points": 3},
-                    {"input": "[1,3,5,7], [2,4,6,8]", "output": "4.5", "points": 3},
-                    {"input": "[1,2,3,4], [5,6,7,8]", "output": "4.5", "points": 3},
-                    {"input": "[1,3,5,7,9], [2,4,6,8,10]", "output": "5.5", "points": 3},
-                    {"input": "[1,2,3,4,5], [6,7,8,9,10]", "output": "5.5", "points": 3},
-                    {"input": "[1,3,5,7,9,11], [2,4,6,8,10,12]", "output": "6.5", "points": 3}
-                ],
-                "total_points": 30
+                "total_points": 40
             }
         ]
         
@@ -225,7 +213,7 @@ class DSARound1(QMainWindow):
         header_layout = QHBoxLayout()
         
         # Timer
-        self.timer_label = QLabel("Time Left: 20:00")
+        self.timer_label = QLabel("Time Left: 45:00")
         self.timer_label.setFont(QFont("Arial", 12, QFont.Bold))
         self.timer_label.setStyleSheet("color: #2E7D32;")
         header_layout.addWidget(self.timer_label)
@@ -243,7 +231,7 @@ class DSARound1(QMainWindow):
         header_layout.addWidget(self.language_combo)
         
         # Question counter
-        self.question_counter = QLabel("DSA Round 1")
+        self.question_counter = QLabel("DSA Round 2")
         self.question_counter.setFont(QFont("Arial", 12))
         header_layout.addWidget(self.question_counter)
         
@@ -344,7 +332,7 @@ class DSARound1(QMainWindow):
     def display_question(self):
         question = self.questions[0]  # Only one question
         question_text = f"""
-        <h3>DSA Round 1</h3>
+        <h3>DSA Round 2</h3>
         <p><b>Question:</b> {question['question']}</p>
         <p><b>Input Format:</b> {question['input_format']}</p>
         <p><b>Output Format:</b> {question['output_format']}</p>
@@ -748,9 +736,15 @@ class DSARound1(QMainWindow):
         code = self.code_input.toPlainText()
         language = self.language_combo.currentText()
         
+        # Calculate time taken
+        end_time = datetime.now()
+        time_taken = end_time - self.start_time
+        minutes = time_taken.seconds // 60
+        seconds = time_taken.seconds % 60
+        
         # Log submission attempt
         self.logger.log_activity(
-            'DSA1',
+            'DSA2',
             'System',
             f'Question {self.current_question + 1}',
             'Submitted',
@@ -764,7 +758,7 @@ class DSARound1(QMainWindow):
         
         # Log results
         self.logger.log_activity(
-            'DSA1',
+            'DSA2',
             'System',
             f'Question {self.current_question + 1}',
             'Completed',
@@ -786,29 +780,35 @@ class DSARound1(QMainWindow):
         score_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(score_label)
         
+        # Time taken label
+        time_label = QLabel(f"Time Taken: {minutes:02d}:{seconds:02d}")
+        time_label.setFont(QFont("Arial", 12))
+        time_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(time_label)
+        
         # Qualification status
         status_label = QLabel()
         status_label.setFont(QFont("Arial", 12))
         status_label.setAlignment(Qt.AlignCenter)
         
         if score >= current_question["total_points"] * 0.5:  # 50% threshold
-            status_label.setText("Congratulations! You have qualified for the next round.")
+            status_label.setText("Congratulations! You have completed the hackathon.")
             status_label.setStyleSheet("color: #2E7D32;")
         else:
-            status_label.setText("Sorry, you did not qualify for the next round.")
+            status_label.setText("Sorry, you did not complete the hackathon successfully.")
             status_label.setStyleSheet("color: #D32F2F;")
             
         layout.addWidget(status_label)
         
         # OK button
         ok_button = QPushButton("OK")
-        ok_button.clicked.connect(lambda: self.close_round(score_dialog, score))
+        ok_button.clicked.connect(lambda: self.close_round(score_dialog, score, time_taken))
         layout.addWidget(ok_button)
         
         score_dialog.setLayout(layout)
         score_dialog.exec_()
         
-    def close_round(self, dialog, score):
+    def close_round(self, dialog, score, time_taken):
         dialog.accept()
         self.finished.emit(score)
         self.close()
@@ -825,7 +825,7 @@ class DSARound1(QMainWindow):
             if reply == QMessageBox.Yes:
                 # Log early exit
                 self.logger.log_activity(
-                    'DSA1',
+                    'DSA2',
                     'System',
                     '',
                     'Exited',
@@ -833,7 +833,6 @@ class DSARound1(QMainWindow):
                     0,
                     'Exited without completing the round'
                 )
-                self.finished.emit(0)
                 event.accept()
             else:
                 event.ignore()
@@ -864,4 +863,28 @@ class DSARound1(QMainWindow):
             "Run Results",
             f"Your code passed {sum(test['passed'] for test in results)} out of {len(results)} test cases.\n"
             f"Score: {score}/{self.questions[0]['total_points']}"
-        ) 
+        )
+
+    def start_timer(self):
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_timer)
+        self.timer.start(1000)  # Update every second
+        
+    def update_timer(self):
+        self.time_left -= 1
+        minutes = self.time_left // 60
+        seconds = self.time_left % 60
+        
+        # Update timer color based on remaining time
+        if minutes < 10:
+            self.timer_label.setStyleSheet("color: #D32F2F;")  # Red for last 10 minutes
+        elif minutes < 20:
+            self.timer_label.setStyleSheet("color: #FFA000;")  # Orange for last 20 minutes
+        else:
+            self.timer_label.setStyleSheet("color: #2E7D32;")  # Green otherwise
+            
+        self.timer_label.setText(f"Time Left: {minutes:02d}:{seconds:02d}")
+        
+        if self.time_left <= 0:
+            self.timer.stop()
+            self.submit_answers() 

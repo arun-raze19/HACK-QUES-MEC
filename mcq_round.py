@@ -10,8 +10,10 @@ from create_mcq import categories, generate_random_questions
 class MCQRound(QMainWindow):
     finished = pyqtSignal(int)  # Signal to emit score when round is finished
     
-    def __init__(self):
+    def __init__(self, team_name, logger):
         super().__init__()
+        self.team_name = team_name
+        self.logger = logger
         self.setWindowTitle("MCQ Round")
         self.setGeometry(100, 100, 1000, 800)
         self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
